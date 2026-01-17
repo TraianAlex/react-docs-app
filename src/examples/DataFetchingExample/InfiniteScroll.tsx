@@ -81,10 +81,10 @@ export default function InfiniteScroll() {
 
         <div ref={sentinelRef} className="text-center p-3">
           {loading && (
-            <>
+            <div role="status">
               <div className="spinner-border spinner-border-sm me-2" />
               <span>Loading more posts...</span>
-            </>
+            </div>
           )}
           {!hasMore && <div className="text-muted">No more posts to load</div>}
         </div>

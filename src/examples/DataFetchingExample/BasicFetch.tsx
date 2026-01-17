@@ -32,7 +32,7 @@ export default function BasicFetch() {
       </div>
       <div className="card-body">
         {loading && (
-          <div className="text-center p-4">
+          <div className="text-center p-4" role="status">
             <div className="spinner-border" />
             <p className="mt-2">Loading posts...</p>
           </div>

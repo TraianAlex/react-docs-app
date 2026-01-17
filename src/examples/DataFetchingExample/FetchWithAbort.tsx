@@ -63,7 +63,7 @@ export default function FetchWithAbort() {
         </div>
 
         {loading && (
-          <div className="alert alert-info">
+          <div className="alert alert-info" role="status">
             <span className="spinner-border spinner-border-sm me-2" />
             Searching for "{query}"...
           </div>

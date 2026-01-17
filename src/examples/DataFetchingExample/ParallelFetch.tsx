@@ -56,7 +56,7 @@ export default function ParallelFetch() {
       </div>
       <div className="card-body">
         {loading && (
-          <div className="text-center p-4">
+          <div className="text-center p-4" role="status">
             <div className="spinner-border" />
             <p className="mt-2">Loading all data in parallel...</p>
           </div>

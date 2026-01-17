@@ -31,8 +31,9 @@ export default function UserForm({
         <form onSubmit={onSubmit}>
           <div className="row g-3">
             <div className="col-md-6">
-              <label className="form-label">Name *</label>
+              <label htmlFor="user-name" className="form-label">Name *</label>
               <input
+                id="user-name"
                 type="text"
                 className="form-control"
                 value={formData.name}
@@ -42,8 +43,9 @@ export default function UserForm({
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Email *</label>
+              <label htmlFor="user-email" className="form-label">Email *</label>
               <input
+                id="user-email"
                 type="email"
                 className="form-control"
                 value={formData.email}
@@ -53,8 +55,9 @@ export default function UserForm({
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Role</label>
+              <label htmlFor="user-role" className="form-label">Role</label>
               <select
+                id="user-role"
                 className="form-select"
                 value={formData.role}
                 onChange={(e) => onChange('role', e.target.value)}
@@ -65,8 +68,9 @@ export default function UserForm({
               </select>
             </div>
             <div className="col-md-6">
-              <label className="form-label">Status</label>
+              <label htmlFor="user-status" className="form-label">Status</label>
               <select
+                id="user-status"
                 className="form-select"
                 value={formData.status}
                 onChange={(e) => onChange('status', e.target.value)}

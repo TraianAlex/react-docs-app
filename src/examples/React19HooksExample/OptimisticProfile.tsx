@@ -57,8 +57,9 @@ export default function OptimisticProfile() {
         )}
 
         <div className="mb-3">
-          <label className="form-label">Name</label>
+          <label htmlFor="profile-name" className="form-label">Name</label>
           <input
+            id="profile-name"
             type="text"
             className="form-control"
             value={optimisticProfile.name}
@@ -68,8 +69,9 @@ export default function OptimisticProfile() {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Email</label>
+          <label htmlFor="profile-email" className="form-label">Email</label>
           <input
+            id="profile-email"
             type="email"
             className="form-control"
             value={optimisticProfile.email}
@@ -79,8 +81,9 @@ export default function OptimisticProfile() {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Bio</label>
+          <label htmlFor="profile-bio" className="form-label">Bio</label>
           <textarea
+            id="profile-bio"
             className="form-control"
             value={optimisticProfile.bio}
             onChange={(e) => handleUpdate('bio', e.target.value)}
