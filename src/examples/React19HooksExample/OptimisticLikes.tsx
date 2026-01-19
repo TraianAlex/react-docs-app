@@ -42,6 +42,7 @@ export default function OptimisticLikes() {
       const newLikes = await postAPI.likePost(postId, post.likes);
       setPosts(posts.map((p) => (p.id === postId ? { ...p, likes: newLikes } : p)));
     } catch (err) {
+      console.error('Failed to like post', err);
       // Revert on error
       setPosts(posts.map((p) => (p.id === postId ? { ...p, likes: post.likes } : p)));
       setError('Failed to like post. Please try again.');

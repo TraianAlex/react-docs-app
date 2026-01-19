@@ -28,11 +28,13 @@ export const postAPI = {
     return { ...post, id: Date.now() };
   },
 
-  async update(id: number, updates: Partial<Post>): Promise<void> {
+  // eslint-disable-next-line no-unused-vars
+  async update(_id: number, _updates: Partial<Post>): Promise<void> {
     await delay(600);
   },
 
-  async delete(id: number): Promise<void> {
+  // eslint-disable-next-line no-unused-vars
+  async delete(_id: number): Promise<void> {
     await delay(500);
   },
 

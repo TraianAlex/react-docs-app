@@ -1,3 +1,4 @@
+  import { FormEvent } from 'react';
 import type { User } from '../shared/types';
 
 interface Props {
@@ -9,8 +10,10 @@ interface Props {
   };
   editingUser: User | null;
   loading: boolean;
-  onSubmit: (e: React.FormEvent) => void;
+  // eslint-disable-next-line no-unused-vars -- callback signature
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
+  // eslint-disable-next-line no-unused-vars -- callback signature
   onChange: (field: string, value: string) => void;
 }
 

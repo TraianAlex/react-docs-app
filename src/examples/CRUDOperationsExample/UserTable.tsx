@@ -3,8 +3,11 @@ import type { User } from '../shared/types';
 interface Props {
   users: User[];
   loading: boolean;
+  // eslint-disable-next-line no-unused-vars
   onEdit: (user: User) => void;
+  // eslint-disable-next-line no-unused-vars
   onDelete: (id: number) => void;
+  // eslint-disable-next-line no-unused-vars
   onToggleStatus: (user: User) => void;
   onRefresh: () => void;
 }

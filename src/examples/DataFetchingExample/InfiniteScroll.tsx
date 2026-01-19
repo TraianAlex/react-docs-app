@@ -24,7 +24,7 @@ export default function InfiniteScroll() {
         setPage((prev) => prev + 1);
       }
     } catch (err) {
-      console.error('Failed to load more posts');
+      console.error('Failed to load more posts', err);
     } finally {
       setLoading(false);
     }
@@ -32,6 +32,7 @@ export default function InfiniteScroll() {
 
   useEffect(() => {
     loadMore(); // Initial load
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

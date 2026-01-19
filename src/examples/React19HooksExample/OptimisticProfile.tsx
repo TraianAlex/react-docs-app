@@ -27,6 +27,7 @@ export default function OptimisticProfile() {
       await profileAPI.update({ [field]: value });
       setProfile({ ...profile, [field]: value });
     } catch (err) {
+      console.error('Failed to update profile', err);
       setError(`Failed to update ${field}`);
     } finally {
       setSaving(false);

@@ -14,6 +14,7 @@ export default function BasicFetch() {
       const data = await postAPI.fetchPosts(1, 5);
       setPosts(data);
     } catch (err) {
+      console.error('Failed to load posts', err);
       setError('Failed to load posts');
     } finally {
       setLoading(false);

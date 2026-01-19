@@ -36,6 +36,7 @@ export default function ParallelFetch() {
 
       setData({ posts, users: [user1, user2] });
     } catch (err) {
+      console.error('Failed to fetch data', err);
       setError('Failed to fetch data');
     } finally {
       setLoading(false);

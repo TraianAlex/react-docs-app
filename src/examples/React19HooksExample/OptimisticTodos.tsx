@@ -1,4 +1,4 @@
-import { useState, useOptimistic } from 'react';
+import { useState, useOptimistic, FormEvent } from 'react';
 import { todoAPI } from '../shared/api/todoAPI';
 import type { Todo } from '../shared/types';
 
@@ -17,7 +17,7 @@ export default function OptimisticTodos() {
   const [newTodoText, setNewTodoText] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const handleAddTodo = async (e: React.FormEvent) => {
+  const handleAddTodo = async (e: FormEvent) => {
     e.preventDefault();
     if (!newTodoText.trim()) return;
 
@@ -35,6 +35,7 @@ export default function OptimisticTodos() {
       const savedTodo = await todoAPI.add(newTodo.text);
       setTodos([...todos, savedTodo]);
     } catch (err) {
+      console.error('Failed to add todo', err);
       setError('Failed to add todo. It will disappear shortly.');
     }
   };
@@ -46,6 +47,7 @@ export default function OptimisticTodos() {
     try {
       await todoAPI.delete(id);
     } catch (err) {
+      console.error('Failed to delete todo', err);
       setTodos(originalTodos);
       setError('Failed to delete todo');
     }

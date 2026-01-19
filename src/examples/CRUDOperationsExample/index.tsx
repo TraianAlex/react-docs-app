@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { userAPI } from '../shared/api/userAPI';
 import type { User } from '../shared/types';
 import UserForm from './UserForm';
@@ -30,13 +30,14 @@ export default function CRUDOperationsExample() {
       const data = await userAPI.getAll();
       setUsers(data);
     } catch (err) {
+      console.error('Failed to load users', err);
       setError('Failed to load users');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email) return;
 
@@ -47,13 +48,14 @@ export default function CRUDOperationsExample() {
       setUsers([...users, newUser]);
       resetForm();
     } catch (err) {
+      console.error('Failed to create user', err);
       setError('Failed to create user');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdate = async (e: React.FormEvent) => {
+  const handleUpdate = async (e: FormEvent) => {
     e.preventDefault();
     if (!editingUser) return;
 
@@ -64,6 +66,7 @@ export default function CRUDOperationsExample() {
       setUsers(users.map((u) => (u.id === editingUser.id ? { ...u, ...formData } : u)));
       resetForm();
     } catch (err) {
+      console.error('Failed to update user', err);
       setError('Failed to update user');
     } finally {
       setLoading(false);
@@ -79,6 +82,7 @@ export default function CRUDOperationsExample() {
       await userAPI.delete(id);
       setUsers(users.filter((u) => u.id !== id));
     } catch (err) {
+      console.error('Failed to delete user', err);
       setError('Failed to delete user');
     } finally {
       setLoading(false);
@@ -109,6 +113,7 @@ export default function CRUDOperationsExample() {
       await userAPI.update(user.id, { status: newStatus });
       setUsers(users.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u)));
     } catch (err) {
+      console.error('Failed to update status', err);
       setError('Failed to update status');
     } finally {
       setLoading(false);

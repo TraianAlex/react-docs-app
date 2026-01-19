@@ -8,6 +8,7 @@ export const todoAPI = {
     return { id: Date.now(), text, completed: false };
   },
 
+  // eslint-disable-next-line no-unused-vars
   async delete(id: number): Promise<void> {
     await delay(500);
     if (Math.random() > 0.95) throw new Error('Failed to delete todo');
