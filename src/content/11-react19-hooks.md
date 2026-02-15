@@ -113,111 +113,180 @@ function App() {
 `useOptimistic` allows you to show optimistic state while an async action is in progress, providing instant feedback to users.
 
 ### Basic Optimistic UI
-```jsx
-import { useOptimistic, useState } from 'react';
+```tsx
+import { useOptimistic, useState, useTransition, FormEvent } from 'react';
+import { todoAPI } from '../shared/api/todoAPI';
+import type { Todo } from '../shared/types';
 
-function TodoList() {
-  const [todos, setTodos] = useState([]);
+const initialTodos: Todo[] = [
+  { id: 1, text: 'Learn React 19 hooks', completed: true },
+  { id: 2, text: 'Build awesome features', completed: false },
+];
+
+function OptimisticTodoAdd() {
+  const [isPending, startTransition] = useTransition();
+  const [todos, setTodos] = useState<Todo[]>(initialTodos);
   const [optimisticTodos, addOptimisticTodo] = useOptimistic(
     todos,
-    (state, newTodo) => [...state, { ...newTodo, pending: true }]
+    (state, newTodo: Todo) => [...state, { ...newTodo, pending: true }],
   );
+  const [newTodoText, setNewTodoText] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAddTodo = async (text) => {
-    const newTodo = { id: Date.now(), text };
-    addOptimisticTodo(newTodo);
+  const handleAddTodo = (e: FormEvent) => {
+    e.preventDefault();
+    startTransition(async () => {
+      if (!newTodoText.trim()) return;
 
-    try {
-      const savedTodo = await saveTodoToServer(newTodo);
-      setTodos([...todos, savedTodo]);
-    } catch (error) {
-      console.error('Failed to save todo');
-    }
+      const newTodo: Todo = {
+        id: Date.now(),
+        text: newTodoText,
+        completed: false,
+      };
+
+      addOptimisticTodo(newTodo);
+      setNewTodoText('');
+      setError(null);
+
+      try {
+        const savedTodo = await todoAPI.add(newTodo.text);
+        setTodos([...todos, savedTodo]);
+      } catch (err) {
+        console.error('Failed to add todo', err);
+        setError('Failed to add todo. It will disappear shortly.');
+      }
+    });
   };
 
   return (
-    <div>
+    <form onSubmit={handleAddTodo}>
+      <input
+        value={newTodoText}
+        onChange={(e) => setNewTodoText(e.target.value)}
+        placeholder="Add a new todo..."
+      />
+      <button type="submit" disabled={isPending}>
+        {isPending ? 'Waiting...' : 'Add Todo'}
+      </button>
+      {error && <p>{error}</p>}
       <ul>
-        {optimisticTodos.map(todo => (
-          <li key={todo.id} style={{ opacity: todo.pending ? 0.5 : 1 }}>
+        {optimisticTodos.map((todo) => (
+          <li key={todo.id} style={{ opacity: todo.pending ? 0.6 : 1 }}>
             {todo.text}
             {todo.pending && <span> (Saving...)</span>}
           </li>
         ))}
       </ul>
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        handleAddTodo(e.target.todo.value);
-        e.target.reset();
-      }}>
-        <input name="todo" placeholder="New todo..." />
-        <button type="submit">Add</button>
-      </form>
-    </div>
+    </form>
   );
 }
 ```
 
 ### Optimistic Likes
-```jsx
-function Post({ post }) {
-  const [likes, setLikes] = useState(post.likes);
-  const [optimisticLikes, addOptimisticLike] = useOptimistic(
-    likes,
-    (state) => state + 1
+```tsx
+import { useOptimistic, useState, useTransition } from 'react';
+import { postAPI } from '../shared/api/postAPI';
+import type { Post } from '../shared/types';
+
+type PostWithPending = Post & { pending: boolean };
+
+const initialPosts: PostWithPending[] = [
+  { id: 1, title: 'Getting Started with React 19', body: 'Learn about the new features in React 19...', author: 'Alice', likes: 42, pending: false },
+  { id: 2, title: 'Understanding Concurrent Features', body: 'Dive deep into useTransition and useDeferredValue...', author: 'Bob', likes: 38, pending: false },
+  { id: 3, title: 'Optimistic UI Updates', body: 'Make your app feel faster with optimistic updates...', author: 'Charlie', likes: 56, pending: false },
+];
+
+function OptimisticLikes() {
+  const [posts, setPosts] = useState<PostWithPending[]>(initialPosts);
+  const [isPending, startTransition] = useTransition();
+  const [optimisticPosts, addOptimisticLike] = useOptimistic(
+    posts,
+    (currentPosts, postId: number) =>
+      currentPosts.map((post) =>
+        post.id === postId ? { ...post, likes: (post.likes ?? 0) + 1, pending: true } : post,
+      ),
   );
 
-  const handleLike = async () => {
-    addOptimisticLike();
+  const handleLike = (postId: number) => {
+    startTransition(async () => {
+      const post = posts.find((p) => p.id === postId);
+      if (!post || post.likes === undefined) return;
 
-    try {
-      const newLikes = await likePost(post.id);
-      setLikes(newLikes);
-    } catch (error) {
-      // Optimistic update will revert automatically
-      console.error('Failed to like post');
-    }
+      addOptimisticLike(postId);
+
+      try {
+        const newLikes = await postAPI.likePost(postId, post.likes);
+        setPosts((current) =>
+          current.map((p) => (p.id === postId ? { ...p, likes: newLikes } : p)),
+        );
+      } catch (err) {
+        console.error('Failed to like post', err);
+        setPosts((current) =>
+          current.map((p) =>
+            p.id === postId ? { ...p, likes: post.likes } : p,
+          ),
+        );
+      }
+    });
   };
 
   return (
     <div>
-      <h2>{post.title}</h2>
-      <p>{post.content}</p>
-      <button onClick={handleLike}>
-        ❤️ {optimisticLikes}
-      </button>
+      {optimisticPosts.map((post) => (
+        <button key={post.id} onClick={() => handleLike(post.id)} disabled={isPending}>
+          ❤️ {post.likes} {isPending && post.pending ? '(Saving...)' : null}
+        </button>
+      ))}
     </div>
   );
 }
 ```
 
 ### Optimistic Delete
-```jsx
-function MessageList() {
-  const [messages, setMessages] = useState([]);
-  const [optimisticMessages, removeOptimisticMessage] = useOptimistic(
-    messages,
-    (state, deletedId) => state.filter(msg => msg.id !== deletedId)
+```tsx
+import { useState, useOptimistic, useTransition } from 'react';
+import { todoAPI } from '../shared/api/todoAPI';
+import type { Todo } from '../shared/types';
+
+const initialTodos: Todo[] = [
+  { id: 1, text: 'Learn React 19 hooks', completed: true },
+  { id: 2, text: 'Build awesome features', completed: false },
+];
+
+function OptimisticDelete() {
+  const [isPending, startTransition] = useTransition();
+  const [todos, setTodos] = useState<Todo[]>(initialTodos);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [optimisticTodosDelete, removeOptimisticTodo] = useOptimistic(
+    todos,
+    (state, id: number) => state.filter((t) => t.id !== id),
   );
 
-  const handleDelete = async (messageId) => {
-    removeOptimisticMessage(messageId);
-
-    try {
-      await deleteMessageFromServer(messageId);
-      setMessages(messages.filter(msg => msg.id !== messageId));
-    } catch (error) {
-      console.error('Failed to delete message');
-      // Reverts optimistic update
-    }
+  const handleDelete = (id: number) => {
+    setIsDeleting(true);
+    startTransition(async () => {
+      const originalTodos = todos;
+      removeOptimisticTodo(id);
+      try {
+        await todoAPI.delete(id);
+        setTodos(todos.filter((t) => t.id !== id));
+        setIsDeleting(false);
+      } catch (err) {
+        console.error('Failed to delete todo', err);
+        setTodos(originalTodos);
+        setIsDeleting(false);
+      }
+    });
   };
 
   return (
     <ul>
-      {optimisticMessages.map(message => (
-        <li key={message.id}>
-          {message.text}
-          <button onClick={() => handleDelete(message.id)}>Delete</button>
+      {(isDeleting ? optimisticTodosDelete : todos).map((todo) => (
+        <li key={todo.id}>
+          {todo.text}
+          <button onClick={() => handleDelete(todo.id)} disabled={isPending}>
+            Delete
+          </button>
         </li>
       ))}
     </ul>
@@ -226,27 +295,41 @@ function MessageList() {
 ```
 
 ### Optimistic Update
-```jsx
-function UserProfile({ user }) {
-  const [profile, setProfile] = useState(user);
+```tsx
+import { useState, useOptimistic, useTransition } from 'react';
+import { profileAPI } from '../shared/api/profileAPI';
+import type { Profile } from '../shared/types';
+
+const initialProfile: Profile = {
+  name: 'John Doe',
+  email: 'john@example.com',
+  bio: 'React developer',
+};
+
+function OptimisticProfile() {
+  const [profile, setProfile] = useState<Profile>(initialProfile);
+  const [isPending, startTransition] = useTransition();
   const [optimisticProfile, updateOptimisticProfile] = useOptimistic(
     profile,
-    (state, updates) => ({ ...state, ...updates })
+    (state, updates: Partial<Profile>) => ({ ...state, ...updates }),
   );
 
-  const handleUpdate = async (field, value) => {
-    updateOptimisticProfile({ [field]: value });
+  const handleUpdate = (field: keyof Profile, value: string) => {
+    startTransition(async () => {
+      updateOptimisticProfile({ [field]: value });
 
-    try {
-      const updated = await updateProfileOnServer({ [field]: value });
-      setProfile(updated);
-    } catch (error) {
-      console.error('Failed to update profile');
-    }
+      try {
+        await profileAPI.update({ [field]: value });
+        setProfile({ ...profile, [field]: value });
+      } catch (err) {
+        console.error('Failed to update profile', err);
+      }
+    });
   };
 
   return (
     <div>
+      {isPending && <p>Saving changes...</p>}
       <input
         value={optimisticProfile.name}
         onChange={(e) => handleUpdate('name', e.target.value)}
@@ -256,6 +339,11 @@ function UserProfile({ user }) {
         value={optimisticProfile.email}
         onChange={(e) => handleUpdate('email', e.target.value)}
         placeholder="Email"
+      />
+      <textarea
+        value={optimisticProfile.bio}
+        onChange={(e) => handleUpdate('bio', e.target.value)}
+        placeholder="Tell us about yourself"
       />
     </div>
   );
