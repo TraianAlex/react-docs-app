@@ -103,7 +103,7 @@ function Input(props) {
 
 1. **One component per file** (for larger components)
 2. **Destructure props** in function parameters
-3. **Use PropTypes** or TypeScript for type safety
+3. **Use TypeScript** for type safety
 4. **Keep components small** and focused on one thing
 5. **Name components with PascalCase**
 6. **Extract reusable components** early

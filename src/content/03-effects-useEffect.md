@@ -110,6 +110,34 @@ function ArticleList() {
   if (error) return <div>Error: {error.message}</div>;
   return <div>{articles.map(article => <div key={article.id}>{article.title}</div>)}</div>;
 }
+
+const PostsList = () => {
+  const [posts, setPosts] = useState([]);
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    if (mounted.current) return; // Prevent extra api calls
+      mounted.current = true;
+      async function fetchPosts() {
+        const resp = await fetch('https://jsonplaceholder.typicode.com/posts');
+        const posts = await resp.json();
+        setPosts(posts);
+      }
+      fetchPosts();
+  }, []);
+
+  return (
+    <div>
+      {posts.map((post: PostType) => (
+        <div key={post.id}>
+          <h3>{post.title}</h3>
+          <div>{post.body}</div>
+          <hr />
+        </div>
+      ))}
+    </div>
+  );
+};
 ```
 
 ## With Async/Await

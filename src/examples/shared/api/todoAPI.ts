@@ -3,7 +3,7 @@ import type { Todo } from '../types';
 
 export const todoAPI = {
   async add(text: string): Promise<Todo> {
-    await delay(800);
+    await delay(2000);
     if (Math.random() > 0.95) throw new Error('Failed to add todo');
     return { id: Date.now(), text, completed: false };
   },

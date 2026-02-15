@@ -39,7 +39,7 @@ export const postAPI = {
   },
 
   async likePost(postId: number, currentLikes: number): Promise<number> {
-    await delay(1000);
+    await delay(2000);
     if (Math.random() > 0.9) throw new Error('Failed to like post');
     return currentLikes + 1;
   },
