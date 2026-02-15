@@ -1,5 +1,6 @@
 import { useState, useTransition } from 'react';
 import { expensiveFilter, type Item } from './itemGenerator';
+import { delay } from '../shared/utils';
 
 interface Props {
   allItems: Item[];
@@ -13,46 +14,47 @@ export default function UseTransitionDemo({ allItems }: Props) {
   const handleSearch = (value: string) => {
     setQuery(value); // Urgent: update input immediately
 
-    startTransition(() => {
+    startTransition(async () => {
       // Non-urgent: update results without blocking
       const filtered = expensiveFilter(allItems, value);
+      await delay(1000);
       setFilteredItems(filtered);
     });
   };
 
   return (
-    <div className="card">
-      <div className="card-header">
+    <div className='card'>
+      <div className='card-header'>
         <h3>useTransition Example</h3>
-        <p className="text-muted mb-0">
-          Type to search {allItems.length.toLocaleString()} items. The input stays responsive while
-          filtering happens in the background.
+        <p className='text-muted mb-0'>
+          Type to search {allItems.length.toLocaleString()} items. The input
+          stays responsive while filtering happens in the background.
         </p>
       </div>
-      <div className="card-body">
-        <div className="mb-3">
+      <div className='card-body'>
+        <div className='mb-3'>
           <input
-            type="text"
-            className="form-control"
-            placeholder="Search items..."
+            type='text'
+            className='form-control'
+            placeholder='Search items...'
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
           />
         </div>
 
         {isPending ? (
-          <div className="alert alert-info">
-            <div className="spinner-border spinner-border-sm me-2" />
+          <div className='alert alert-info'>
+            <div className='spinner-border spinner-border-sm me-2' />
             Filtering {allItems.length.toLocaleString()} items...
           </div>
         ) : (
-          <div className="alert alert-success">
+          <div className='alert alert-success'>
             Found {filteredItems.length.toLocaleString()} items
           </div>
         )}
 
         <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-          <table className="table table-sm table-striped">
+          <table className='table table-sm table-striped'>
             <thead>
               <tr>
                 <th>Name</th>
@@ -65,7 +67,7 @@ export default function UseTransitionDemo({ allItems }: Props) {
                 <tr key={item.id}>
                   <td>{item.name}</td>
                   <td>
-                    <span className="badge bg-secondary">{item.category}</span>
+                    <span className='badge bg-secondary'>{item.category}</span>
                   </td>
                   <td>${item.price}</td>
                 </tr>
@@ -73,7 +75,7 @@ export default function UseTransitionDemo({ allItems }: Props) {
             </tbody>
           </table>
           {filteredItems.length > 50 && (
-            <p className="text-muted text-center">
+            <p className='text-muted text-center'>
               Showing first 50 of {filteredItems.length} results
             </p>
           )}

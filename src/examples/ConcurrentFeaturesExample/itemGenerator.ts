@@ -21,7 +21,7 @@ export const generateItems = (count: number): Item[] => {
 // Simulate expensive filtering with artificial delay
 export const expensiveFilter = (items: Item[], query: string): Item[] => {
   const start = Date.now();
-  while (Date.now() - start < 20) {
+  while (Date.now() - start < 200) {
     // Busy wait to simulate heavy computation
   }
 
@@ -29,6 +29,6 @@ export const expensiveFilter = (items: Item[], query: string): Item[] => {
     (item) =>
       item.name.toLowerCase().includes(query.toLowerCase()) ||
       item.description.toLowerCase().includes(query.toLowerCase()) ||
-      item.category.toLowerCase().includes(query.toLowerCase())
+      item.category.toLowerCase().includes(query.toLowerCase()),
   );
 };
