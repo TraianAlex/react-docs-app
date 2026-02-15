@@ -8,11 +8,16 @@ const initialTodos: Todo[] = [
 ];
 
 export default function OptimisticTodos() {
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
   const [todos, setTodos] = useState<Todo[]>(initialTodos);
   const [optimisticTodos, addOptimisticTodo] = useOptimistic(
     todos,
     (state, newTodo: Todo) => [...state, { ...newTodo, pending: true }],
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [optimisticTodosDelete, removeOptimisticTodo] = useOptimistic(
+    todos,
+    (state, id: number) => state.filter((t) => t.id !== id),
   );
 
   const [newTodoText, setNewTodoText] = useState('');
@@ -20,7 +25,7 @@ export default function OptimisticTodos() {
 
   const handleAddTodo = (e: FormEvent) => {
     e.preventDefault();
-    startTransition(async() => {
+    startTransition(async () => {
       if (!newTodoText.trim()) return;
 
       const newTodo: Todo = {
@@ -43,18 +48,27 @@ export default function OptimisticTodos() {
     });
   };
 
-  const handleDelete = async (id: number) => {
-    const originalTodos = todos;
-    setTodos(todos.filter((t) => t.id !== id));
-
-    try {
-      await todoAPI.delete(id);
-    } catch (err) {
-      console.error('Failed to delete todo', err);
-      setTodos(originalTodos);
-      setError('Failed to delete todo');
-    }
+  const handleDelete = (id: number) => {
+    setIsDeleting(true);
+    startTransition(async () => {
+      const originalTodos = todos;
+      removeOptimisticTodo(id);
+      try {
+        await todoAPI.delete(id);
+        setTodos(todos.filter((t) => t.id !== id));
+        setIsDeleting(false);
+      } catch (err) {
+        console.error('Failed to delete todo', err);
+        setTodos(originalTodos);
+        setError('Failed to delete todo');
+        setIsDeleting(false);
+      }
+    });
   };
+
+  const optimisticTodosAddDelete = isDeleting
+    ? optimisticTodosDelete
+    : optimisticTodos;
 
   return (
     <div className='card'>
@@ -75,8 +89,12 @@ export default function OptimisticTodos() {
               value={newTodoText}
               onChange={(e) => setNewTodoText(e.target.value)}
             />
-            <button type='submit' className='btn btn-primary'>
-              Add Todo
+            <button
+              type='submit'
+              className='btn btn-primary'
+              disabled={isPending}
+            >
+              {isPending ? 'Waiting...' : 'Add Todo'}
             </button>
           </div>
         </form>
@@ -93,7 +111,7 @@ export default function OptimisticTodos() {
         )}
 
         <ul className='list-group'>
-          {optimisticTodos.map((todo) => (
+          {optimisticTodosAddDelete.map((todo) => (
             <li
               key={todo.id}
               className='list-group-item d-flex justify-content-between align-items-center'
